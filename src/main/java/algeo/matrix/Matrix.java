@@ -127,8 +127,8 @@ public class Matrix {
 
     //Menukar dua baris
     public void swapRows(int row1, int row2) {
+        validateRowIndex(row1);
         validateRowIndex(row2);
-        validateColIndex(row2);
         if (row1 != row2) {
             double[] temp = this.spl[row1];
             this.spl[row1] = this.spl[row2];
