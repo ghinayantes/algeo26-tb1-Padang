@@ -1,13 +1,13 @@
-package algeo.matrix; 
+package algeo.matrix;
 
 public class Matrix {
     //private agar ukurannya tidak bisa diubah diluar class
-    private int rows; 
+    private int rows;
     private int cols;
     private double[][] spl; //elemen matrix desimal, array of array
 
-    //CONSTRUCTOR 
-    
+    //CONSTRUCTOR
+
     //Membuat matriks baru berukuran rows x cols
     public Matrix(int rows, int cols) {
         if (rows <= 0 || cols <= 0) {
@@ -18,7 +18,7 @@ public class Matrix {
         this.spl = new double[rows][cols];
     }
 
-    //Membuat matriks dari array 2D 
+    //Membuat matriks dari array 2D
     //spl.length = banyak baris
     //spl[0].length = banyak kolom di baris pertama
     public Matrix(double[][] spl) {
@@ -37,14 +37,14 @@ public class Matrix {
         }
     }
 
-    //VALIDASI INDEX 
- 
+    //VALIDASI INDEX
+
     private void validateRowIndex(int row) {
         if (row < 0 || row >= rows) {
             throw new MatrixException("Index baris " + row + " di luar batas (0 - " + (rows - 1) + ").");
         }
     }
- 
+
     private void validateColIndex(int col) {
         if (col < 0 || col >= cols) {
             throw new MatrixException("Index kolom " + col + " di luar batas (0 - " + (cols - 1) + ").");
@@ -62,7 +62,7 @@ public class Matrix {
 
     //Mengambil elemen
     public double get(int row, int col) {
-        validateRowIndex(row); 
+        validateRowIndex(row);
         validateColIndex(col);
         return this.spl[row][col];
     }
@@ -205,7 +205,7 @@ public class Matrix {
     }
 
     //Membentuk submatrix dengan menghapus excludeRow dan excludeCol
-    public Matrix getsubmatrix(int excludeRow, int excludeCol) {
+    public Matrix getSubmatrix(int excludeRow, int excludeCol) {
         validateRowIndex(excludeRow);
         validateColIndex(excludeCol);
         if (this.rows <= 1 || this.cols <= 1) {
@@ -224,5 +224,87 @@ public class Matrix {
             row++; //Naikkan indeks baris setelah 1 baris selesai diisi
         }
         return submatrix;
+    }
+
+    //ELIMINASI / PIVOTING
+
+    //Batas toleransi perbandingan double (untuk equals, hashCode, dan pengecekan pivot nol)
+    private static final double EPSILON = 1e-9;
+
+    //Mencari indeks baris dengan |elemen| terbesar pada kolom col, mulai dari startRow ke bawah
+    public int getPivotRow(int startRow, int col) {
+        validateRowIndex(startRow);
+        validateColIndex(col);
+        int pivotRow = startRow;
+        double maxAbs = Math.abs(this.spl[startRow][col]);
+        for (int i = startRow + 1; i < this.rows; i++) {
+            double absVal = Math.abs(this.spl[i][col]);
+            if (absVal > maxAbs) {
+                maxAbs = absVal;
+                pivotRow = i;
+            }
+        }
+        return pivotRow;
+    }
+
+    //Partial pivoting: menukar baris startRow dengan baris ber-|elemen| terbesar pada kolom col.
+    //Setelah swap, baris pivot (nilai absolut terbesar) berada di startRow.
+    //Return value: indeks ASAL baris yang ditukar ke startRow (sebelum swap) - berguna untuk
+    //tracking permutasi/perubahan tanda determinant, BUKAN posisi pivot setelah swap (itu = startRow).
+    public int partialPivot(int startRow, int col) {
+        int pivotRow = getPivotRow(startRow, col);
+        if (Math.abs(this.spl[pivotRow][col]) <= EPSILON) {
+            throw new MatrixException("Tidak ada elemen pivot yang tak nol pada kolom " + col
+                    + " mulai dari baris " + startRow + ".");
+        }
+        swapRows(startRow, pivotRow);
+        return pivotRow;
+    }
+
+    //OVERRIDE UNTUK TESTING/DEBUGGING
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < this.rows; i++) {
+            for (int j = 0; j < this.cols; j++) {
+                if (j > 0) sb.append("\t");
+                sb.append(String.format("%.6g", this.spl[i][j]));
+            }
+            if (i < this.rows - 1) sb.append("\n");
+        }
+        return sb.toString();
+    }
+
+    //Membandingkan dua matriks elemen demi elemen dengan toleransi EPSILON
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Matrix m = (Matrix) obj;
+        if (this.rows != m.rows || this.cols != m.cols) return false;
+        for (int i = 0; i < this.rows; i++) {
+            for (int j = 0; j < this.cols; j++) {
+                if (Math.abs(this.spl[i][j] - m.spl[i][j]) > EPSILON) return false;
+            }
+        }
+        return true;
+    }
+
+    //Hash dibuat toleran terhadap EPSILON yang sama dengan equals(), supaya dua matrix
+    //yang equals() == true juga PASTI punya hashCode() yang sama (kontrak wajib Java).
+    //Nilai dibulatkan ke kelipatan EPSILON sebelum di-hash, bukan pakai bit exact double.
+    @Override
+    public int hashCode() {
+        int result = 1;
+        for (int i = 0; i < this.rows; i++) {
+            for (int j = 0; j < this.cols; j++) {
+                long rounded = Math.round(this.spl[i][j] / EPSILON);
+                result = 31 * result + (int) (rounded ^ (rounded >>> 32));
+            }
+        }
+        result = 31 * result + this.rows;
+        result = 31 * result + this.cols;
+        return result;
     }
 }
