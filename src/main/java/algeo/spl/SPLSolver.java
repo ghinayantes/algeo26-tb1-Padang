@@ -29,6 +29,6 @@ public interface SPLSolver {
      * Overload default method agar bisa langsung dipanggil jika A dan B terpisah.
      */
     default String solve(Matrix A, Matrix B) {
-        return solve(Matrix.augment(A, B));
+        return solve(A.augment(B));
     }
 }

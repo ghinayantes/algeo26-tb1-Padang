@@ -261,6 +261,24 @@ public class Matrix {
         return pivotRow;
     }
 
+    // augmented
+    public Matrix augment(Matrix other) {
+    int rows = this.getRows();
+    int colsA = this.getCols();
+    int colsB = other.getCols();
+    
+    Matrix augmented = new Matrix(rows, colsA + colsB);
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < colsA; j++) {
+            augmented.set(i, j, this.get(i, j));
+        }
+        for (int j = 0; j < colsB; j++) {
+            augmented.set(i, colsA + j, other.get(i, j));
+        }
+    }
+    return augmented;
+}
+
     //OVERRIDE UNTUK TESTING/DEBUGGING
 
     @Override
