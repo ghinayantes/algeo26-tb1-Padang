@@ -2,7 +2,7 @@ package algeo.spl;
 
 import algeo.matrix.Matrix;
 
-public class GaussianElimination implements SPLSolver {
+public class Gauss implements SPLSolver {
     @Override
     public String solve(Matrix augmentedMatrix) {
         // Buat salinan matriks agar data awal inputan pengguna tidak rusak

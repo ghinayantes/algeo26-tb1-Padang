@@ -1,7 +1,7 @@
 package algeo.spl;
 import algeo.matrix.Matrix;
 
-public class CramerRule implements SPLSolver {
+public class Cramer implements SPLSolver {
 	@Override
 	public String solve(Matrix augmentedMatrix) {
 		// Kerangka cramer
