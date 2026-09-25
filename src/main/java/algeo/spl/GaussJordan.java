@@ -2,7 +2,7 @@ package algeo.spl;
 
 import algeo.matrix.Matrix;
 
-public class GaussJordanElimination implements SPLSolver {
+public class GaussJourdanElimination implements SPLSolver {
     @Override
     public String solve(Matrix augmentedMatrix) {
         Matrix mat = augmentedMatrix.copy();
