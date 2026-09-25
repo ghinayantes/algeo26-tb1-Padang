@@ -6,6 +6,49 @@ import algeo.determinant.DeterminantCofactor;
 
 public class InverseSPL implements SPLSolver {
     @Override
+    public String getName() {
+        return "Metode Matriks Balikan";
+    }
+
+    @Override
+    public boolean isApplicable(Matrix augmentedMatrix) {
+        int rows = augmentedMatrix.getRows();
+        int cols = augmentedMatrix.getCols();
+        // Cramer hanya bisa jika matriks persegi (cols == rows + 1)
+        return cols == rows + 1;
+    }
+
+    @Override
+    public double[] solveToVector(Matrix augmentedMatrix) {
+        int rows = augmentedMatrix.getRows();
+        int cols = augmentedMatrix.getCols();
+        if (cols != rows + 1) return null;
+        
+        int n = rows;
+        Matrix matA = new Matrix(n, n);
+        double[] b = new double[n];
+
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                matA.set(i, j, augmentedMatrix.get(i, j));
+            }
+            b[i] = augmentedMatrix.get(i, n);
+        }
+
+        double detA = algeo.determinant.DeterminantOBE.determinantOBE(matA);
+        if (Math.abs(detA) < 1e-9) return null;
+
+        double[] x = new double[n];
+        for (int i = 0; i < n; i++) {
+            Matrix matAi = matA.copy();
+            matAi.setColumn(i, b);
+            double detAi = algeo.determinant.DeterminantOBE.determinantOBE(matAi);
+            x[i] = detAi / detA;
+        }
+        return x;
+    }
+
+    @Override
     public String solve(Matrix augmentedMatrix) {
         StringBuilder steps = new StringBuilder();
         int rows = augmentedMatrix.getRows();
