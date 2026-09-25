@@ -1,4 +1,4 @@
-public package algeo.spl;
+package algeo.spl;
 
 import algeo.matrix.Matrix;
 import algeo.determinant.DeterminantOBE;
@@ -73,6 +73,4 @@ public class InverseSPL implements SPLSolver {
 
         return steps.toString();
     }
-} {
-    
 }
