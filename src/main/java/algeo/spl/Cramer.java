@@ -4,7 +4,7 @@ import algeo.matrix.Matrix;
 import algeo.determinant.DeterminantOBE;
 
 public class Cramer implements SPLSolver {
-	@Override
+    @Override
     public String getName() {
         return "Kaidah Cramer";
     }
@@ -22,7 +22,7 @@ public class Cramer implements SPLSolver {
         int rows = augmentedMatrix.getRows();
         int cols = augmentedMatrix.getCols();
         if (cols != rows + 1) return null;
-        
+
         int n = rows;
         Matrix matA = new Matrix(n, n);
         double[] b = new double[n];
@@ -34,19 +34,19 @@ public class Cramer implements SPLSolver {
             b[i] = augmentedMatrix.get(i, n);
         }
 
-        double detA = algeo.determinant.DeterminantOBE.determinantOBE(matA);
+        double detA = DeterminantOBE.determinantOBE(matA);
         if (Math.abs(detA) < 1e-9) return null;
 
         double[] x = new double[n];
         for (int i = 0; i < n; i++) {
             Matrix matAi = matA.copy();
             matAi.setColumn(i, b);
-            double detAi = algeo.determinant.DeterminantOBE.determinantOBE(matAi);
+            double detAi = DeterminantOBE.determinantOBE(matAi);
             x[i] = detAi / detA;
         }
         return x;
     }
-	
+
     @Override
     public String solve(Matrix augmentedMatrix) {
         StringBuilder steps = new StringBuilder();
@@ -74,8 +74,9 @@ public class Cramer implements SPLSolver {
             b[i] = augmentedMatrix.get(i, n);
         }
 
-        // 2. Hitung determinan matriks utama A 
+        // 2. Hitung determinan matriks utama A
         double detA = DeterminantOBE.determinantOBE(matA);
+        steps.append("Matriks koefisien A:\n").append(matA).append("\n");
         steps.append(String.format("Determinan matriks utama det(A) = %.4f\n\n", detA));
 
         // Pengecekan det(A) = 0
@@ -93,12 +94,13 @@ public class Cramer implements SPLSolver {
             double detAi = DeterminantOBE.determinantOBE(matAi);
             x[i] = detAi / detA;
 
-            steps.append(String.format("det(A%d) = %.4f  -->  x%d = det(A%d) / det(A) = %.4f / %.4f = %.4f\n",
+            steps.append(String.format("A%d (kolom ke-%d diganti b):\n", i + 1, i + 1)).append(matAi).append("\n");
+            steps.append(String.format("det(A%d) = %.4f  -->  x%d = det(A%d) / det(A) = %.4f / %.4f = %.4f\n\n",
                     i + 1, detAi, i + 1, i + 1, detAi, detA, x[i]));
         }
 
         // 4. Cetak solusi akhir
-        steps.append("\nHasil Solusi:\n");
+        steps.append("Hasil Solusi:\n");
         for (int i = 0; i < n; i++) {
             steps.append(String.format("x%d = %.4f\n", i + 1, x[i]));
         }
