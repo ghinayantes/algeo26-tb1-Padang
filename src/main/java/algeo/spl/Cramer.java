@@ -53,11 +53,14 @@ public class Cramer implements SPLSolver {
         int rows = augmentedMatrix.getRows();
         int cols = augmentedMatrix.getCols();
 
-        steps.append("=== PROSES KAIDAH CRAMER ===\n\n");
+        steps.append("=========================================================\n");
+        steps.append(" PENYELESAIAN SPL : KAIDAH CRAMER\n");
+        steps.append("=========================================================\n\n");
 
         // 1. Cek syarat matriks persegi (N x N)
         if (cols != rows + 1) {
-            steps.append("Kaidah Cramer hanya dapat digunakan jika jumlah persamaan sama dengan jumlah variabel (matriks persegi).\n");
+            steps.append("-> Kaidah Cramer hanya dapat digunakan jika jumlah persamaan\n");
+            steps.append("   sama dengan jumlah variabel (matriks koefisien harus persegi).\n");
             return steps.toString();
         }
 
@@ -75,17 +78,29 @@ public class Cramer implements SPLSolver {
         }
 
         // 2. Hitung determinan matriks utama A
+        steps.append("[Langkah 1] Membentuk Matriks Koefisien (A) dan Menghitung det(A)\n");
+        steps.append("Matriks Koefisien A:\n");
+        for (int r = 0; r < matA.getRows(); r++) {
+            steps.append("   ");
+            for (int c = 0; c < matA.getCols(); c++) {
+                steps.append(String.format("%10.4f ", matA.get(r, c)));
+            }
+            steps.append("\n");
+        }
+        steps.append("\n");
+        
         double detA = DeterminantOBE.determinantOBE(matA);
-        steps.append("Matriks koefisien A:\n").append(matA).append("\n");
-        steps.append(String.format("Determinan matriks utama det(A) = %.4f\n\n", detA));
+        steps.append(String.format("det(A) = %.4f\n\n", detA));
 
         // Pengecekan det(A) = 0
         if (Math.abs(detA) < 1e-9) {
-            steps.append("Karena det(A) = 0, Kaidah Cramer tidak dapat digunakan (SPL tidak memiliki solusi tunggal).\n");
+            steps.append("Karena det(A) = 0, SPL ini tidak memiliki solusi tunggal.\n");
+            steps.append("Kaidah Cramer tidak dapat dilanjutkan.\n");
             return steps.toString();
         }
 
         // 3. Hitung det(Ai) dan variabel x_i untuk setiap kolom
+        steps.append("[Langkah 2] Membentuk Matriks A_i dan Menghitung Nilai Variabel\n\n");
         double[] x = new double[n];
         for (int i = 0; i < n; i++) {
             Matrix matAi = matA.copy();
@@ -94,15 +109,25 @@ public class Cramer implements SPLSolver {
             double detAi = DeterminantOBE.determinantOBE(matAi);
             x[i] = detAi / detA;
 
-            steps.append(String.format("A%d (kolom ke-%d diganti b):\n", i + 1, i + 1)).append(matAi).append("\n");
-            steps.append(String.format("det(A%d) = %.4f  -->  x%d = det(A%d) / det(A) = %.4f / %.4f = %.4f\n\n",
-                    i + 1, detAi, i + 1, i + 1, detAi, detA, x[i]));
+            steps.append(String.format("-> Matriks A_%d (Kolom ke-%d diganti dengan vektor konstanta b):\n", i + 1, i + 1));
+            for (int r = 0; r < matAi.getRows(); r++) {
+                steps.append("   ");
+                for (int c = 0; c < matAi.getCols(); c++) {
+                    steps.append(String.format("%10.4f ", matAi.get(r, c)));
+                }
+                steps.append("\n");
+            }
+            
+            steps.append(String.format("   det(A_%d) = %.4f\n", i + 1, detAi));
+            steps.append(String.format("   x_%d = det(A_%d) / det(A) = %.4f / %.4f = %.4f\n\n",
+                    i + 1, i + 1, detAi, detA, x[i]));
         }
 
         // 4. Cetak solusi akhir
-        steps.append("Hasil Solusi:\n");
+        steps.append("=========================================================\n");
+        steps.append("Hasil Akhir Penyelesaian SPL:\n");
         for (int i = 0; i < n; i++) {
-            steps.append(String.format("x%d = %.4f\n", i + 1, x[i]));
+            steps.append(String.format("x_%d = %.4f\n", i + 1, x[i]));
         }
 
         return steps.toString();

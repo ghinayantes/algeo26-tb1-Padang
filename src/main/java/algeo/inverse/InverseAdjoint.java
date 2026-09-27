@@ -69,34 +69,75 @@ public final class InverseAdjoint {
         }
  
         StringBuilder steps = new StringBuilder();
-        steps.append("=== PROSES MATRIKS BALIKAN (Metode Adjoin) ===\n\n");
-        steps.append("Matriks A:\n").append(m).append("\n\n");
+        steps.append("=========================================================\n");
+        steps.append(" PROSES MENCARI INVERS MATRIKS : METODE ADJOIN\n");
+        steps.append("=========================================================\n\n");
+        
+        steps.append("Matriks A:\n");
+        for (int r = 0; r < m.getRows(); r++) {
+            for (int c = 0; c < m.getCols(); c++) {
+                steps.append(String.format("%10.4f ", m.get(r, c)));
+            }
+            steps.append("\n");
+        }
+        steps.append("\n");
  
         double det = DeterminantOBE.determinantOBE(m);
-        steps.append(String.format("Determinan A = %.6f\n\n", det));
+        steps.append("[Langkah 1] Menghitung Determinan\n");
+        steps.append(String.format("det(A) = %.4f\n\n", det));
  
         if (Math.abs(det) <= EPSILON) {
-            steps.append("Karena det(A) = 0, matriks singular dan tidak memiliki invers.\n");
+            steps.append("Karena det(A) = 0, matriks ini adalah matriks singular.\n");
+            steps.append("Matriks singular tidak memiliki invers.\n");
             throw new MatrixException("Matriks singular, tidak memiliki invers.");
         }
  
         int n = m.getRows();
         Matrix cof = new Matrix(n, n);
-        steps.append("Matriks Kofaktor C (tiap elemen C_ij = (-1)^(i+j) * det(minor_ij)):\n");
+        steps.append("[Langkah 2] Membentuk Matriks Kofaktor (C)\n");
+        steps.append("(Tiap elemen C(i,j) = (-1)^(i+j) * det(Minor(i,j)))\n");
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 double c = cofactor(m, i, j);
                 cof.set(i, j, c);
             }
         }
-        steps.append(cof).append("\n\n");
+        
+        for (int r = 0; r < cof.getRows(); r++) {
+            steps.append("   "); // Indentasi
+            for (int c = 0; c < cof.getCols(); c++) {
+                steps.append(String.format("%10.4f ", cof.get(r, c)));
+            }
+            steps.append("\n");
+        }
+        steps.append("\n");
  
         Matrix adj = cof.transpose();
-        steps.append("Matriks Adjoin (= transpose dari Matriks Kofaktor):\n").append(adj).append("\n\n");
+        steps.append("[Langkah 3] Membentuk Matriks Adjoin\n");
+        steps.append("(Matriks Adjoin adalah hasil transpose dari Matriks Kofaktor)\n");
+        for (int r = 0; r < adj.getRows(); r++) {
+            steps.append("   ");
+            for (int c = 0; c < adj.getCols(); c++) {
+                steps.append(String.format("%10.4f ", adj.get(r, c)));
+            }
+            steps.append("\n");
+        }
+        steps.append("\n");
  
         Matrix result = adj.multiplyByScalar(1.0 / det);
-        steps.append(String.format("A^-1 = (1 / det(A)) * Adjoin = (1 / %.6f) * Adjoin:\n", det));
-        steps.append(result).append("\n");
+        steps.append("[Langkah 4] Menghitung Invers Matriks (A^-1)\n");
+        steps.append("A^-1 = (1 / det(A)) * Adjoin\n");
+        steps.append(String.format("A^-1 = (1 / %.4f) * Adjoin\n\n", det));
+        
+        steps.append("Hasil Akhir Invers Matriks A:\n");
+        for (int r = 0; r < result.getRows(); r++) {
+            for (int c = 0; c < result.getCols(); c++) {
+                steps.append(String.format("%10.4f ", result.get(r, c)));
+            }
+            steps.append("\n");
+        }
+        steps.append("\n");
+        steps.append("=========================================================\n");
  
         return steps.toString();
     }

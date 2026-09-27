@@ -57,11 +57,14 @@ public class InverseSPL implements SPLSolver {
         int rows = augmentedMatrix.getRows();
         int cols = augmentedMatrix.getCols();
 
-        steps.append("=== PROSES METODE MATRIKS BALIKAN (INVERS) ===\n\n");
+        steps.append("=========================================================\n");
+        steps.append(" PENYELESAIAN SPL : METODE MATRIKS BALIKAN (INVERS)\n");
+        steps.append("=========================================================\n\n");
 
         // 1. Cek syarat matriks persegi
         if (cols != rows + 1) {
-            steps.append("Metode Matriks Balikan hanya dapat digunakan jika jumlah persamaan sama dengan jumlah variabel (matriks persegi).\n");
+            steps.append("-> Metode Matriks Balikan hanya dapat digunakan jika jumlah persamaan\n");
+            steps.append("   sama dengan jumlah variabel (matriks koefisien harus persegi).\n");
             return steps.toString();
         }
 
@@ -78,31 +81,65 @@ public class InverseSPL implements SPLSolver {
             matB.set(i, 0, augmentedMatrix.get(i, n));
         }
 
-        steps.append("Matriks koefisien A:\n").append(matA).append("\n\n");
-        steps.append("Vektor konstanta b:\n").append(matB).append("\n\n");
+        steps.append("[Langkah 1] Memisahkan Matriks Koefisien (A) dan Vektor Konstanta (b)\n");
+        steps.append("Matriks Koefisien A:\n");
+        for (int r = 0; r < matA.getRows(); r++) {
+            steps.append("   ");
+            for (int c = 0; c < matA.getCols(); c++) {
+                steps.append(String.format("%10.4f ", matA.get(r, c)));
+            }
+            steps.append("\n");
+        }
+        steps.append("\n");
+
+        steps.append("Vektor Konstanta b:\n");
+        for (int r = 0; r < matB.getRows(); r++) {
+            steps.append("   ");
+            for (int c = 0; c < matB.getCols(); c++) {
+                steps.append(String.format("%10.4f ", matB.get(r, c)));
+            }
+            steps.append("\n");
+        }
+        steps.append("\n");
 
         // 2. Cek Determinan A
+        steps.append("[Langkah 2] Memeriksa Determinan Matriks A\n");
         double detA = DeterminantOBE.determinantOBE(matA);
-        steps.append(String.format("Determinan matriks utama det(A) = %.4f\n\n", detA));
+        steps.append(String.format("   det(A) = %.4f\n\n", detA));
 
         if (Math.abs(detA) < 1e-9) {
-            steps.append("Karena det(A) = 0, matriks tidak memiliki invers (singular). Metode Matriks Balikan tidak dapat digunakan.\n");
+            steps.append("-> Karena det(A) = 0, matriks A adalah matriks singular (tidak memiliki invers).\n");
+            steps.append("   Penyelesaian dengan Metode Matriks Balikan tidak dapat dilanjutkan.\n");
             return steps.toString();
         }
 
         // 3. Menghitung matriks invers A dengan augmentasi [A|I]
+        steps.append("[Langkah 3] Mencari Invers Matriks A (A^-1)\n");
         Matrix invA = InverseAugmented.inverse(matA);
+        
+        // Memanggil proses step-by-step dari kelas InverseAugmented
         steps.append(InverseAugmented.inverseWithSteps(matA)).append("\n");
 
         // 4. Menghitung solusi
+        steps.append("[Langkah 4] Menghitung Solusi (X = A^-1 * b)\n");
         Matrix matX = invA.multiply(matB);
-        steps.append("X = A^(-1) * b:\n").append(matX).append("\n");
+        steps.append("Matriks X:\n");
+        for (int r = 0; r < matX.getRows(); r++) {
+            steps.append("   ");
+            for (int c = 0; c < matX.getCols(); c++) {
+                steps.append(String.format("%10.4f ", matX.get(r, c)));
+            }
+            steps.append("\n");
+        }
+        steps.append("\n");
 
         // 5. Cetak Solusi Akhir
-        steps.append("\nHasil Solusi:\n");
+        steps.append("=========================================================\n");
+        steps.append("Hasil Akhir Penyelesaian SPL:\n");
         for (int i = 0; i < n; i++) {
-            steps.append(String.format("x%d = %.4f\n", i + 1, matX.get(i, 0)));
+            steps.append(String.format("x_%d = %.4f\n", i + 1, matX.get(i, 0)));
         }
+        steps.append("=========================================================\n");
 
         return steps.toString();
     }

@@ -51,8 +51,18 @@ public class DeterminantOBE {
         double det = 1.0;
         StringBuilder steps = new StringBuilder();
  
-        steps.append("=== PROSES DETERMINAN (Metode Reduksi Baris / OBE) ===\n\n");
-        steps.append("Matriks awal:\n").append(mat).append("\n\n");
+        steps.append("=========================================================\n");
+        steps.append(" PROSES HITUNG DETERMINAN : METODE REDUKSI BARIS (OBE)\n");
+        steps.append("=========================================================\n\n");
+ 
+        steps.append("Matriks Awal:\n");
+        for (int r = 0; r < mat.getRows(); r++) {
+            for (int c = 0; c < mat.getCols(); c++) {
+                steps.append(String.format("%10.4f ", mat.get(r, c)));
+            }
+            steps.append("\n");
+        }
+        steps.append("\n");
  
         for (int i = 0; i < rows; i++) {
             int maxRow = i;
@@ -63,38 +73,67 @@ public class DeterminantOBE {
             }
  
             if (Math.abs(mat.get(maxRow, i)) <= EPSILON) {
-                steps.append("Kolom ke-").append(i + 1)
-                     .append(" tidak memiliki elemen pivot tak-nol -> determinan = 0\n");
-                steps.append("\nHasil Determinan = 0.000000\n");
+                steps.append(String.format("-> Pivot pada kolom ke-%d bernilai 0.\n", i + 1));
+                steps.append("   Karena ada kolom tanpa pivot tak-nol, determinan matriks adalah 0.\n\n");
+                steps.append("=========================================================\n");
+                steps.append("Hasil Akhir Determinan = 0.000000\n");
                 return steps.toString();
             }
  
             if (maxRow != i) {
                 mat.swapRows(i, maxRow);
                 det = -det;
-                steps.append(String.format("Tukar Baris %d dengan Baris %d (Partial Pivoting, tanda determinan berbalik)\n",
-                        i + 1, maxRow + 1));
-                steps.append(mat).append("\n\n");
+                steps.append(String.format("[Tukar Baris] Baris %d ditukar dengan Baris %d\n", i + 1, maxRow + 1));
+                steps.append("   (Partial pivoting. Tanda determinan berbalik: det = -det)\n");
+                
+                // Cetak matriks setelah tukar baris dengan indentasi
+                for (int r = 0; r < mat.getRows(); r++) {
+                    steps.append("   ");
+                    for (int c = 0; c < mat.getCols(); c++) {
+                        steps.append(String.format("%10.4f ", mat.get(r, c)));
+                    }
+                    steps.append("\n");
+                }
+                steps.append("\n");
             }
  
             double pivot = mat.get(i, i);
             det *= pivot;
-            steps.append(String.format("Pivot baris %d = %.4f  |  det sementara = %.4f\n", i + 1, pivot, det));
+            steps.append(String.format("-> Pivot diagonal a(%d,%d) = %.4f  |  det sementara = %.4f\n", 
+                    i + 1, i + 1, pivot, det));
  
+            boolean hasElimination = false;
             for (int j = i + 1; j < rows; j++) {
                 double factor = mat.get(j, i) / pivot;
                 if (Math.abs(factor) > EPSILON) {
-                    steps.append(String.format("Baris %d dikurangi (%.4f) * Baris %d\n", j + 1, factor, i + 1));
+                    hasElimination = true;
+                    steps.append(String.format("   Operasi OBE: Baris %d = Baris %d - (%.4f) * Baris %d\n", 
+                            j + 1, j + 1, factor, i + 1));
                     for (int c = i; c < rows; c++) {
                         mat.set(j, c, mat.get(j, c) - factor * mat.get(i, c));
                     }
                 }
             }
-            steps.append(mat).append("\n\n");
+            
+            // Hanya cetak matriks jika ada operasi OBE yang terjadi pada baris ini
+            if (hasElimination) {
+                steps.append("   Matriks setelah OBE:\n");
+                for (int r = 0; r < mat.getRows(); r++) {
+                    steps.append("   ");
+                    for (int c = 0; c < mat.getCols(); c++) {
+                        steps.append(String.format("%10.4f ", mat.get(r, c)));
+                    }
+                    steps.append("\n");
+                }
+                steps.append("\n");
+            } else if (i < rows - 1) {
+                steps.append("   (Tidak ada operasi karena elemen di bawah pivot sudah 0)\n\n");
+            }
         }
  
-        steps.append(String.format("Determinan = hasil kali seluruh pivot diagonal = %.6f\n", det));
+        steps.append("=========================================================\n");
+        steps.append("Matriks telah menjadi matriks segitiga atas.\n");
+        steps.append(String.format("Hasil Akhir (Hasil kali diagonal utama yang telah disesuaikan tanda) = %.6f\n", det));
         return steps.toString();
     }
 }
-

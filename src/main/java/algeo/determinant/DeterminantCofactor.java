@@ -53,6 +53,43 @@ public class DeterminantCofactor {
         return det;
     }
 
+    // cari yang paling banyak 0
+    private static int[] findBestLine(Matrix m) {
+        int n = m.getRows();
+        int bestType = 1;
+        int bestIndex = 0;
+        int bestZeroCount = -1;
+
+        for (int i = 0; i < n; i++) {
+            int zeroCount = 0;
+            for (int j = 0; j < n; j++) {
+                if (Math.abs(m.get(i, j)) <= EPSILON) {
+                    zeroCount++;
+                }
+            }
+            if (zeroCount > bestZeroCount) {
+                bestZeroCount = zeroCount;
+                bestIndex = i;
+            }
+        }
+
+        for (int j = 0; j < n; j++) {
+            int zeroCount = 0;
+            for (int i = 0; i < n; i++) {
+                if (Math.abs(m.get(i, j)) <= EPSILON) {
+                    zeroCount++;
+                }
+            }
+            if (zeroCount > bestZeroCount) {
+                bestType = 0;
+                bestZeroCount = zeroCount;
+                bestIndex = j;
+            }
+        }
+
+        return new int[] {bestType, bestIndex, bestZeroCount};
+    }
+
     // class untuk menampilkan step-by-step
     public static String cofactorExpansionWithSteps(Matrix m) {
         if (m.getRows() != m.getCols()) {
@@ -61,20 +98,32 @@ public class DeterminantCofactor {
 
         int n = m.getRows();
         StringBuilder steps = new StringBuilder();
-        steps.append("=== PROSES DETERMINAN (Metode Ekspansi Kofaktor) ===\n\n");
-        steps.append("Matriks:\n").append(m).append("\n\n");
+        
+        steps.append("=========================================================\n");
+        steps.append(" PROSES HITUNG DETERMINAN : METODE EKSPANSI KOFAKTOR\n");
+        steps.append("=========================================================\n\n");
+ 
+        steps.append("Matriks A:\n");
+        for (int r = 0; r < m.getRows(); r++) {
+            for (int c = 0; c < m.getCols(); c++) {
+                steps.append(String.format("%10.6f ", m.get(r, c))); 
+            }
+            steps.append("\n");
+        }
+steps.append("\n");
 
         if (n == 1) {
-            steps.append("Matriks 1x1, determinan = elemen itu sendiri.\n");
-            steps.append(String.format("Determinan = %.6f\n", m.get(0, 0)));
+            steps.append("Matriks berukuran 1x1. Nilai determinan adalah elemen itu sendiri.\n");
+            steps.append(String.format("det(A) = %.6f\n", m.get(0, 0)));
             return steps.toString();
         }
 
         if (n == 2) {
             double det2 = m.get(0, 0) * m.get(1, 1) - m.get(0, 1) * m.get(1, 0);
-            steps.append(String.format("Matriks 2x2, rumus langsung: (%.4f * %.4f) - (%.4f * %.4f)\n",
+            steps.append("Matriks berukuran 2x2. Menggunakan rumus langsung (ad - bc):\n");
+            steps.append(String.format("det(A) = (%.4f * %.4f) - (%.4f * %.4f)\n",
                     m.get(0, 0), m.get(1, 1), m.get(0, 1), m.get(1, 0)));
-            steps.append(String.format("Determinan = %.6f\n", det2));
+            steps.append(String.format("det(A) = %.6f\n", det2));
             return steps.toString();
         }
 
@@ -82,8 +131,8 @@ public class DeterminantCofactor {
         boolean isRow = line[0] == 1;
         int idx = line[1];
 
-        steps.append(String.format("Ekspansi kofaktor sepanjang %s ke-%d (%s dengan elemen nol terbanyak: %d nol):\n\n",
-                isRow ? "baris" : "kolom", idx + 1, isRow ? "baris" : "kolom", line[2]));
+        steps.append(String.format("Melakukan ekspansi pada %s ke-%d\n", isRow ? "Baris" : "Kolom", idx + 1));
+        steps.append(String.format("(Jalur ini dipilih karena memiliki %d buah elemen nol)\n\n", line[2]));
 
         double det = 0;
         for (int k = 0; k < n; k++) {
@@ -92,8 +141,8 @@ public class DeterminantCofactor {
             double a = m.get(i, j);
 
             if (Math.abs(a) <= EPSILON) {
-                steps.append(String.format("Suku %d: elemen a(%d,%d) = 0 -> kontribusi 0, minor tidak dihitung\n\n",
-                        k + 1, i + 1, j + 1));
+                steps.append(String.format("-> Suku ke-%d: Elemen a(%d,%d) bernilai 0.\n", k + 1, i + 1, j + 1));
+                steps.append("   Perhitungan minor dilewati karena matriks akan dikalikan dengan 0.\n\n");
                 continue;
             }
 
@@ -103,45 +152,28 @@ public class DeterminantCofactor {
             double term = sign * a * minorDet;
             det += term;
 
-            steps.append(String.format("Suku %d: tanda=%s, elemen a(%d,%d)=%.4f, minor M(%d,%d):\n",
-                    k + 1, sign > 0 ? "+" : "-", i + 1, j + 1, a, i + 1, j + 1));
-            steps.append(minor).append("\n");
-            steps.append(String.format("det(minor) = %.6f  ->  kontribusi = %s%.4f * %.6f = %.6f\n\n",
-                    minorDet, sign > 0 ? "+" : "-", a, minorDet, term));
+            steps.append(String.format("-> Suku ke-%d: Elemen a(%d,%d) = %.4f\n", k + 1, i + 1, j + 1, a));
+            steps.append(String.format("   Tanda kofaktor: %s\n", sign > 0 ? "(+1)" : "(-1)"));
+            steps.append(String.format("   Matriks Minor M(%d,%d):\n", i + 1, j + 1));
+            for (int r = 0; r < minor.getRows(); r++) {
+                steps.append("      "); // Indentasi agar sejajar
+                for (int c = 0; c < minor.getCols(); c++) {
+                    steps.append(String.format("%10.4f ", minor.get(r, c))); 
+                }
+                steps.append("\n");
+            }
+            steps.append(String.format("   det(M) = %.6f\n", minorDet));
+            steps.append(String.format("   Nilai Suku = %s * %.4f * %.6f = %.6f\n\n", 
+                    sign > 0 ? "(+1)" : "(-1)", a, minorDet, term));
         }
 
         double rounded = Math.round(det);
         if (Math.abs(det - rounded) < EPSILON) {
             det = rounded;
         }
-        steps.append(String.format("Determinan = jumlah seluruh kontribusi = %.6f\n", det));
+        
+        steps.append("====================================================\n");
+        steps.append(String.format("Hasil Akhir (Jumlah seluruh suku hasil ekspansi) = %.6f\n", det));
         return steps.toString();
-    }
-
-    // Cari baris/kolom dengan elemen nol terbanyak, return {1 = baris / 0 = kolom, indeks, jumlah nol}
-    private static int[] findBestLine(Matrix m) {
-        int n = m.getRows();
-        int[] best = {1, 0, -1};
-
-        for (int i = 0; i < n; i++) {
-            int zeros = 0;
-            for (int j = 0; j < n; j++) {
-                if (Math.abs(m.get(i, j)) <= EPSILON) zeros++;
-            }
-            if (zeros > best[2]) {
-                best = new int[]{1, i, zeros};
-            }
-        }
-
-        for (int j = 0; j < n; j++) {
-            int zeros = 0;
-            for (int i = 0; i < n; i++) {
-                if (Math.abs(m.get(i, j)) <= EPSILON) zeros++;
-            }
-            if (zeros > best[2]) {
-                best = new int[]{0, j, zeros};
-            }
-        }
-        return best;
     }
 }

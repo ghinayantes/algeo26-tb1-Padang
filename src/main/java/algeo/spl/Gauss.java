@@ -49,18 +49,28 @@ public class Gauss implements SPLSolver {
         int numVars = cols - 1;
         int[] pivotCol = new int[rows];
 
-        steps.append("=== PROSES ELIMINASI GAUSS ===\n\n");
-        steps.append("Matriks augmented awal:\n").append(mat).append("\n\n");
+        steps.append("=========================================================\n");
+        steps.append(" PENYELESAIAN SPL : METODE ELIMINASI GAUSS\n");
+        steps.append("=========================================================\n\n");
+
+        steps.append("[Langkah 1] Membentuk Matriks Augmented [A|b] awal:\n");
+        appendAugmentedMatrix(steps, mat);
+        steps.append("\n");
 
         // 1. Eliminasi maju + Partial pivoting
+        steps.append("[Langkah 2] Eliminasi Maju (Membentuk Eselon Baris)\n");
         int rank = forwardElimination(mat, pivotCol, steps);
 
         // 2. Cek konsistensi SPL (Cek kasus tidak ada solusi)
         // Baris [0 0 0 ... | k] dengan k != 0 artinya kontradiksi (0 = k)
+        steps.append("[Langkah 3] Evaluasi Konsistensi SPL\n");
         if (isInconsistent(mat)) {
-            steps.append("\nSistem Persamaan Linear tidak memiliki solusi (Kontradiksi).\n");
+            steps.append("-> Ditemukan baris kontradiksi (0 = k, dengan k != 0).\n");
+            steps.append("   Sistem Persamaan Linear TIDAK MEMILIKI SOLUSI.\n");
+            steps.append("=========================================================\n");
             return steps.toString();
         }
+        steps.append("-> SPL konsisten (memiliki solusi).\n\n");
 
         // 3. Tandai variabel bebas, tiap variabel bebas jadi parameter t1, t2, ...
         boolean[] isPivot = new boolean[numVars];
@@ -80,7 +90,7 @@ public class Gauss implements SPLSolver {
         }
 
         // 4. Substitusi mundur (Ngitung nilai variabel pivot dari bawah ke atas)
-        steps.append("\n=== TAHAP SUBSTITUSI MUNDUR ===\n");
+        steps.append("[Langkah 4] Tahap Substitusi Mundur\n");
         for (int i = rank - 1; i >= 0; i--) {
             int p = pivotCol[i];
             sol[p][0] = mat.get(i, cols - 1);
@@ -94,19 +104,20 @@ public class Gauss implements SPLSolver {
                     }
                 }
             }
-            steps.append(String.format("x%d = %s\n", p + 1, formatExpression(sol[p])));
+            steps.append(String.format("   x_%d = %s\n", p + 1, formatExpression(sol[p])));
         }
 
         // 5. Cetak solusi akhir
+        steps.append("\n=========================================================\n");
         if (numFree == 0) {
-            steps.append("\nHasil Solusi (Solusi Tunggal):\n");
+            steps.append("Hasil Akhir (Solusi Tunggal):\n");
         } else {
-            steps.append("\nSPL memiliki solusi tak hingga banyaknya.\n");
-            steps.append("Hasil Solusi (Parametrik):\n");
+            steps.append("Hasil Akhir (Solusi Parametrik / Tak Hingga Banyaknya):\n");
         }
         for (int j = 0; j < numVars; j++) {
-            steps.append(String.format("x%d = %s\n", j + 1, formatExpression(sol[j])));
+            steps.append(String.format("x_%d = %s\n", j + 1, formatExpression(sol[j])));
         }
+        steps.append("=========================================================\n");
 
         return steps.toString();
     }
@@ -131,38 +142,48 @@ public class Gauss implements SPLSolver {
 
             // Kolom ini tidak punya pivot, pindah ke kolom berikutnya (baris tetap)
             if (Math.abs(mat.get(maxRow, c)) < EPSILON) {
-                steps.append(String.format("Kolom %d tidak memiliki pivot tak-nol, lanjut ke kolom berikutnya\n", c + 1));
+                steps.append(String.format("-> Kolom ke-%d tidak memiliki pivot tak-nol. Lanjut ke kolom berikutnya.\n", c + 1));
                 continue;
             }
+
+            boolean changed = false;
 
             // Jika baris terbesar bukan di posisi r, tukar barisnya
             if (maxRow != r) {
                 mat.swapRows(r, maxRow);
-                steps.append(String.format("Tukar Baris %d dengan Baris %d (Partial Pivoting)\n", r + 1, maxRow + 1));
+                steps.append(String.format("-> [Tukar Baris] Baris %d ditukar dengan Baris %d (Partial Pivoting)\n", r + 1, maxRow + 1));
+                changed = true;
             }
 
             // 1.2 Normalisasi pivot (Ubah angka pivot jadi 1)
             double pivot = mat.get(r, c);
             if (Math.abs(pivot - 1.0) > EPSILON) {
-                steps.append(String.format("Baris %d dibagi %.4f\n", r + 1, pivot));
+                steps.append(String.format("-> [Normalisasi] Baris %d dibagi %.4f (pivot menjadi 1)\n", r + 1, pivot));
                 for (int j = c; j < cols; j++) {
                     mat.set(r, j, mat.get(r, j) / pivot);
                 }
+                changed = true;
             }
 
             // 1.3 Eliminasi baris di bawah pivot (Bikin angka di bawah pivot jadi 0)
             for (int j = r + 1; j < rows; j++) {
                 double factor = mat.get(j, c);
                 if (Math.abs(factor) > EPSILON) {
-                    steps.append(String.format("Baris %d dikurangi (%.4f) * Baris %d\n", j + 1, factor, r + 1));
+                    steps.append(String.format("   Operasi OBE: Baris %d = Baris %d - (%.4f) * Baris %d\n", j + 1, j + 1, factor, r + 1));
                     for (int k = c; k < cols; k++) {
                         double newVal = mat.get(j, k) - (factor * mat.get(r, k));
                         mat.set(j, k, newVal);
                     }
+                    changed = true;
                 }
             }
 
-            steps.append(mat).append("\n\n");
+            if (changed) {
+                steps.append("   Matriks [A|b] sementara:\n");
+                appendAugmentedMatrix(steps, mat);
+                steps.append("\n");
+            }
+            
             pivotCol[r] = c;
             r++;
         }
@@ -214,5 +235,19 @@ public class Gauss implements SPLSolver {
             sb.append("t").append(k);
         }
         return sb.toString();
+    }
+    
+    // Fungsi bantuan untuk mencetak matriks [A|b] secara rapi
+    private void appendAugmentedMatrix(StringBuilder steps, Matrix mat) {
+        int rows = mat.getRows();
+        int cols = mat.getCols();
+        for (int r = 0; r < rows; r++) {
+            steps.append("   ");
+            for (int c = 0; c < cols; c++) {
+                if (c == cols - 1) steps.append(" | ");
+                steps.append(String.format("%10.4f ", mat.get(r, c)));
+            }
+            steps.append("\n");
+        }
     }
 }
