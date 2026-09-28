@@ -1,0 +1,357 @@
+/*
+ * theme.css — palet & gaya untuk aplikasi Algeo.
+ *
+ * File ini menggantikan hampir semua Background/Border/Font yang dulu
+ * dirakit manual di Theme.java. Java hanya menugaskan style class
+ * (getStyleClass().add(...)) atau menyalakan pseudo-class ":active";
+ * warna, radius, hover, dan fokus semuanya diatur di sini.
+ *
+ * Palet warna:
+ *  - Deep Navy   #253759 -> teks utama, latar sidebar/header
+ *  - Slate Blue  #466273 -> teks sekunder/label, elemen pendukung
+ *  - Light Gray-Blue #C0D9D9 -> dasar latar halaman (dilembutkan)
+ *  - Honey Bronze #EDAE49 -> aksen/CTA: tombol utama, fokus, grafik
+ *
+ * Font: Poppins (bukan font bawaan sistem). Berkasnya ada di fonts/
+ * sebelah file ini (Poppins-Regular.ttf, Poppins-SemiBold.ttf,
+ * Poppins-Bold.ttf) dan didaftarkan lewat Font.loadFont() di
+ * Theme.loadEmbeddedFonts() sebelum Scene ini dipasang — lihat komentar
+ * di Theme.java. Regular & Bold berbagi nama keluarga "Poppins" (dipilih
+ * lewat -fx-font-weight normal/bold); SemiBold berkeluarga sendiri
+ * "Poppins SemiBold" (begitulah berkas static Google Fonts ini diberi
+ * nama), jadi dirujuk langsung lewat nama itu di style class yang perlu
+ * tebal-sedang (heading, label kolom matriks, dsb).
+ *
+ * Sentuhan ala macOS yang ditambahkan di versi ini:
+ *  - Focus ring lembut (soft glow) di text field, meniru cincin fokus
+ *    biru bawaan macOS — di sini pakai warna aksen aplikasi (emas).
+ *  - Tombol utama punya "glow" tipis warna aksen, meniru default button
+ *    di dialog macOS.
+ *  - Baris sidebar terpilih jadi highlight bulat penuh (bukan garis
+ *    strip di kiri), seperti sidebar Mail/Notes/System Settings.
+ *  - Segmented control terasa sedikit "inset", seperti NSSegmentedControl.
+ *  - Scrollbar dibuat tipis & overlay, meniru scrollbar macOS.
+ *
+ * Ukuran teks dinaikkan di seluruh aplikasi (base 13px -> 14px, judul
+ * halaman 22px -> 27px, dst.) supaya lebih nyaman dibaca (user-friendly),
+ * dan judul halaman aktif (page-title) dibuat lebih tebal (700).
+ *
+ * Catatan: PlotView menggambar langsung ke Canvas lewat GraphicsContext,
+ * jadi tidak bisa disentuh CSS — warna & fontnya tetap diambil dari
+ * konstanta Java di Theme (nilai hex & nama font-nya sengaja disamakan
+ * dengan variabel/berkas di sini agar tetap sinkron).
+ */
+
+.root {
+    -paper: #EAF1F1;
+    -surface: #FFFFFF;
+    -sidebar: #253759;
+    -ink: #253759;
+    -muted: #466273;
+    -line: #D2E2E2;
+    -accent: #EDAE49;
+    -accent-hover: #C9943E;
+    -accent-soft: #FCF3E4;
+    -eval: #C4841D;
+    -eval-dark: #7A5210;
+    -eval-soft: #FBF1DF;
+    -danger: #B4413B;
+    -danger-soft: #F8E6E4;
+    -nav-text: #AEBEC8;
+    -nav-active-bg: #33465F;
+    -nav-group: #7E93A0;
+
+    -fx-font-family: "Poppins", "Segoe UI", "Inter", "Helvetica Neue",
+                      "Noto Sans", "DejaVu Sans", sans-serif;
+    -fx-font-size: 14px;
+    -fx-font-smoothing-type: lcd;
+    -fx-background-color: -paper;
+}
+
+.paper-bg {
+    -fx-background-color: -paper;
+}
+
+/* ---------- Kartu ---------- */
+.card {
+    -fx-background-color: -surface;
+    -fx-background-radius: 10;
+    -fx-padding: 22;
+    -fx-effect: dropshadow(gaussian, rgba(37, 55, 89, 0.08), 22, 0, 0, 5);
+}
+
+/* ---------- Tombol ---------- */
+/* Meniru "default button" di dialog macOS: flat tapi ada glow tipis
+   berwarna aksen (emas) di sekitarnya untuk menandakan ini aksi utama. */
+.button-primary {
+    -fx-background-color: linear-gradient(to bottom, derive(-accent, 8%), -accent);
+    -fx-background-radius: 8;
+    -fx-border-width: 0;
+    -fx-text-fill: white;
+    -fx-font-family: "Poppins SemiBold";
+    -fx-font-size: 14px;
+    -fx-padding: 10 20 10 20;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(237, 174, 73, 0.35), 10, 0, 0, 2);
+}
+.button-primary:hover {
+    -fx-background-color: linear-gradient(to bottom, derive(-accent-hover, 8%), -accent-hover);
+}
+.button-primary:pressed {
+    -fx-background-color: -accent-hover;
+    -fx-effect: dropshadow(gaussian, rgba(237, 174, 73, 0.22), 4, 0, 0, 1);
+}
+
+/* Tombol "bezel" ala macOS: flat, hairline border, gelap tipis saat hover/pressed. */
+.button-secondary {
+    -fx-background-color: -surface;
+    -fx-background-radius: 8;
+    -fx-border-color: -line;
+    -fx-border-radius: 8;
+    -fx-border-width: 0.75;
+    -fx-text-fill: -ink;
+    -fx-font-size: 14px;
+    -fx-padding: 9 15 9 15;
+    -fx-cursor: hand;
+}
+.button-secondary:hover {
+    -fx-background-color: -paper;
+}
+.button-secondary:pressed {
+    -fx-background-color: derive(-paper, -6%);
+}
+
+.button-ghost {
+    -fx-background-color: transparent;
+    -fx-background-radius: 6;
+    -fx-border-width: 0;
+    -fx-text-fill: -muted;
+    -fx-font-size: 13.5px;
+    -fx-padding: 4 8 4 8;
+    -fx-cursor: hand;
+}
+.button-ghost:hover {
+    -fx-background-color: -danger-soft;
+    -fx-text-fill: -danger;
+}
+
+/* ---------- Input ---------- */
+.text-field {
+    -fx-background-color: -surface;
+    -fx-background-radius: 6;
+    -fx-border-color: -line;
+    -fx-border-radius: 6;
+    -fx-border-width: 1;
+    -fx-padding: 8 10 8 10;
+    -fx-font-size: 14px;
+    -fx-text-fill: -ink;
+    -fx-prompt-text-fill: -muted;
+}
+/* Cincin fokus lembut ala macOS, di sini pakai warna aksen (emas). */
+.text-field:focused {
+    -fx-border-color: -accent;
+    -fx-border-width: 1.4;
+    -fx-effect: dropshadow(gaussian, derive(-accent, 55%), 5, 0.55, 0, 0);
+}
+.mono-field {
+    -fx-font-family: "SF Mono", "Cascadia Mono", "Consolas", "JetBrains Mono", "Menlo", "DejaVu Sans Mono", monospace;
+}
+.cell-field-target {
+    -fx-background-color: -accent-soft;
+}
+
+.output-area .content {
+    -fx-background-color: -surface;
+}
+.output-area {
+    -fx-background-color: -surface;
+    -fx-background-radius: 8;
+    -fx-border-color: -line;
+    -fx-border-radius: 8;
+    -fx-border-width: 0.75;
+    -fx-font-family: "SF Mono", "Cascadia Mono", "Consolas", "JetBrains Mono", "Menlo", "DejaVu Sans Mono", monospace;
+    -fx-font-size: 13.5px;
+}
+
+/* ---------- Teks ---------- */
+.heading {
+    -fx-font-family: "Poppins SemiBold";
+    -fx-font-size: 17px;
+    -fx-text-fill: -ink;
+}
+.caption {
+    -fx-font-size: 13.5px;
+    -fx-text-fill: -muted;
+}
+.field-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: -muted;
+}
+.matrix-col-header {
+    -fx-font-family: "Poppins SemiBold";
+    -fx-font-size: 12.5px;
+    -fx-text-fill: -muted;
+}
+.row-index-label {
+    -fx-font-size: 13px;
+    -fx-text-fill: -muted;
+}
+/* Judul halaman aktif (mis. "Matriks balikan") — dibuat besar & tebal
+   supaya langsung terlihat menu/halaman mana yang sedang dibuka. */
+.page-title {
+    -fx-font-size: 27px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -ink;
+}
+
+/* ---------- Status inline ---------- */
+.status-label {
+    -fx-font-size: 13.5px;
+    -fx-background-radius: 8;
+    -fx-padding: 8 12 8 12;
+}
+.status-label.status-info  { -fx-background-color: -accent-soft; -fx-text-fill: -accent-hover; }
+.status-label.status-warn  { -fx-background-color: -eval-soft;   -fx-text-fill: -eval-dark; }
+.status-label.status-error { -fx-background-color: -danger-soft; -fx-text-fill: -danger; }
+
+/* ---------- Permukaan tabel / grid ---------- */
+.grid-surface {
+    -fx-background-color: -surface;
+}
+.divider {
+    -fx-background-color: -line;
+}
+.augmented-separator {
+    -fx-background-color: rgba(237, 174, 73, 0.55);
+}
+
+/* ScrollPane transparan: konten di dalamnya (grid-surface) yang menyediakan warna */
+.scroll-transparent,
+.scroll-transparent .viewport {
+    -fx-background-color: transparent;
+}
+.scroll-transparent {
+    -fx-border-width: 0;
+}
+
+/* ScrollPane konten halaman utama: mengikuti warna latar aplikasi */
+.content-scroll,
+.content-scroll .viewport {
+    -fx-background-color: -paper;
+}
+.content-scroll {
+    -fx-border-width: 0;
+}
+
+/* ---------- Scrollbar tipis ala macOS (overlay, tanpa tombol panah) ---------- */
+.scroll-bar {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+.scroll-bar .track,
+.scroll-bar .track-background {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+}
+.scroll-bar .thumb {
+    -fx-background-color: rgba(37, 55, 89, 0.25);
+    -fx-background-radius: 6;
+    -fx-background-insets: 2;
+}
+.scroll-bar .thumb:hover,
+.scroll-bar .thumb:pressed {
+    -fx-background-color: rgba(37, 55, 89, 0.4);
+}
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button,
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
+    -fx-opacity: 0;
+}
+.scroll-bar:vertical {
+    -fx-pref-width: 10;
+}
+.scroll-bar:horizontal {
+    -fx-pref-height: 10;
+}
+
+/* ---------- Segmented control (pemilih metode), meniru NSSegmentedControl ---------- */
+.segmented-box {
+    -fx-background-color: -paper;
+    -fx-background-radius: 9;
+    -fx-padding: 3;
+    -fx-effect: innershadow(gaussian, rgba(37, 55, 89, 0.08), 3, 0.4, 0, 1);
+}
+.segment-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 7;
+    -fx-border-width: 0;
+    -fx-text-fill: -muted;
+    -fx-font-size: 14px;
+    -fx-padding: 8 15 8 15;
+    -fx-cursor: hand;
+}
+.segment-button:active {
+    -fx-background-color: -surface;
+    -fx-background-radius: 7;
+    -fx-text-fill: -accent-hover;
+    -fx-font-weight: 700;
+    -fx-effect: dropshadow(gaussian, rgba(37, 55, 89, 0.18), 4, 0, 0, 1);
+}
+
+/* ---------- Sidebar ---------- */
+.sidebar {
+    -fx-background-color: -sidebar;
+}
+.brand-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: 700;
+    -fx-text-fill: white;
+}
+.brand-sub {
+    -fx-font-size: 12.5px;
+    -fx-text-fill: -nav-group;
+}
+.nav-group-label {
+    -fx-font-family: "Poppins SemiBold";
+    -fx-font-size: 12.5px;
+    -fx-text-fill: -nav-group;
+}
+.sidebar-footer {
+    -fx-font-size: 12px;
+    -fx-text-fill: -nav-group;
+}
+/* Baris sidebar, ala Mail/Notes/System Settings: highlight bulat penuh
+   saat terpilih (bukan garis strip di kiri), dengan hover halus. Judul
+   menu yang sedang aktif ditebalkan (700) agar jelas tab mana yang dibuka. */
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 7;
+    -fx-border-width: 0;
+    -fx-text-fill: -nav-text;
+    -fx-font-size: 14.5px;
+    -fx-padding: 10 12 10 12;
+    -fx-cursor: hand;
+}
+.nav-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.06);
+    -fx-text-fill: white;
+}
+.nav-button:active {
+    -fx-background-color: -nav-active-bg;
+    -fx-background-radius: 7;
+    -fx-text-fill: -accent;
+    -fx-font-weight: 700;
+}
+.nav-button:active:hover {
+    -fx-background-color: derive(-nav-active-bg, 10%);
+}
+
+/* ---------- Header halaman ---------- */
+.page-title {
+    -fx-font-size: 27px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -ink;
+}
