@@ -14,6 +14,11 @@ import java.util.Scanner;
 
 public final class IOUtils {
 
+    public static final int MAX_MANUAL_MATRIX_SIZE = 11;
+    public static final int MAX_FILE_MATRIX_ROWS = 1001;
+    public static final int MAX_FILE_MATRIX_COLUMNS = 1002;
+    public static final int MAX_CURVE_POINTS = 10;
+
     private IOUtils() {
     }
 
@@ -56,6 +61,10 @@ public final class IOUtils {
 
     // membaca input 
     public static Matrix readMatrixManual(Scanner sc, int rows, int cols) {
+        if (rows > MAX_MANUAL_MATRIX_SIZE || cols > MAX_MANUAL_MATRIX_SIZE + 1) {
+            throw new MatrixException("Input manual dibatasi maksimal " + MAX_MANUAL_MATRIX_SIZE
+                    + " baris dan " + (MAX_MANUAL_MATRIX_SIZE + 1) + " kolom untuk SPL augmented.");
+        }
         Matrix m = new Matrix(rows, cols);
         System.out.println("Masukkan elemen matriks baris per baris (pisahkan dengan spasi):");
         for (int i = 0; i < rows; i++) {
@@ -85,6 +94,7 @@ public final class IOUtils {
 
     // membaca input n pasang titik koordinat
     public static double[][] readPointsManual(Scanner sc, int n) {
+        validatePointCount(n);
         double[] xs = new double[n];
         double[] ys = new double[n];
         for (int i = 0; i < n; i++) {
@@ -108,6 +118,10 @@ public final class IOUtils {
         }
         String[] firstTokens = lines.get(0).trim().split("\\s+");
         int cols = firstTokens.length;
+        if (rows > MAX_FILE_MATRIX_ROWS || cols > MAX_FILE_MATRIX_COLUMNS) {
+            throw new MatrixException("Ukuran matriks pada berkas melebihi batas " + MAX_FILE_MATRIX_ROWS
+                    + " baris dan " + MAX_FILE_MATRIX_COLUMNS + " kolom.");
+        }
 
         Matrix m = new Matrix(rows, cols);
         for (int i = 0; i < rows; i++) {
@@ -130,6 +144,7 @@ public final class IOUtils {
         if (n == 0) {
             throw new MatrixException("File '" + path + "' tidak ada data titiknya.");
         }
+        validatePointCount(n);
         double[] xs = new double[n];
         double[] ys = new double[n];
         for (int i = 0; i < n; i++) {
@@ -141,6 +156,12 @@ public final class IOUtils {
             ys[i] = parseDouble(tokens[1]);
         }
         return new double[][] { xs, ys };
+    }
+
+    private static void validatePointCount(int n) {
+        if (n <= 0 || n > MAX_CURVE_POINTS) {
+            throw new MatrixException("Jumlah titik data harus antara 1 dan " + MAX_CURVE_POINTS + " titik.");
+        }
     }
 
     // membaca isi file dengan mengabaikan baris kosong di bagian paling akhir

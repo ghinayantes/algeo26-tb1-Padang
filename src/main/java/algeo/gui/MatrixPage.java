@@ -42,6 +42,9 @@ public class MatrixPage extends VBox {
     private final Solver solver;
     private final String[] methods;
     private String method;
+    private boolean loadedFromFile;
+    private boolean settingFileDimensions;
+    private Matrix largeFileMatrix;
 
     private final Spinner<Integer> rowsSpinner;
     private final Spinner<Integer> colsSpinner; // hanya untuk augmented
@@ -63,14 +66,14 @@ public class MatrixPage extends VBox {
         HBox segmented = segmented();
 
         // Ukuran
-        rowsSpinner = spinner(1, maxSize, 3);
-        colsSpinner = spinner(1, maxSize, 3);
+        rowsSpinner = spinner(1, IOUtils.MAX_FILE_MATRIX_ROWS, 3);
+        colsSpinner = spinner(1, IOUtils.MAX_FILE_MATRIX_ROWS, 3);
         HBox sizeRow = augmented
                 ? new HBox(20, Theme.labeled("Persamaan", rowsSpinner), Theme.labeled("Variabel", colsSpinner))
                 : new HBox(20, Theme.labeled("Ukuran n \u00D7 n", rowsSpinner));
         sizeRow.setAlignment(Pos.CENTER_LEFT);
-        rowsSpinner.valueProperty().addListener((o, a, b) -> rebuildGrid(null));
-        colsSpinner.valueProperty().addListener((o, a, b) -> rebuildGrid(null));
+        rowsSpinner.valueProperty().addListener((o, a, b) -> dimensionChanged(rowsSpinner));
+        colsSpinner.valueProperty().addListener((o, a, b) -> dimensionChanged(colsSpinner));
 
         Button loadBtn = Theme.secondaryButton("Muat dari .txt");
         loadBtn.setOnAction(e -> loadFile());
@@ -164,6 +167,23 @@ public class MatrixPage extends VBox {
 
     private int rows() { return rowsSpinner.getValue(); }
 
+    private void dimensionChanged(Spinner<Integer> changed) {
+        if (settingFileDimensions) return;
+        loadedFromFile = false;
+        largeFileMatrix = null;
+        if (changed.getValue() > maxSize) {
+            settingFileDimensions = true;
+            rowsSpinner.getValueFactory().setValue(Math.min(rowsSpinner.getValue(), maxSize));
+            colsSpinner.getValueFactory().setValue(Math.min(colsSpinner.getValue(), maxSize));
+            settingFileDimensions = false;
+            rebuildGrid(null);
+            Theme.showStatus(status, Theme.Tone.WARN,
+                    "Input manual dibatasi maksimal " + maxSize + " baris dan variabel");
+            return;
+        }
+        rebuildGrid(null);
+    }
+
     private int cols() { return augmented ? colsSpinner.getValue() + 1 : rowsSpinner.getValue(); }
 
     private void rebuildGrid(Matrix m) {
@@ -206,6 +226,15 @@ public class MatrixPage extends VBox {
 
     // algoritma untuk "Kosongkan"
     private void clearGrid() {
+        loadedFromFile = false;
+        largeFileMatrix = null;
+        if (cells.length == 0) {
+            settingFileDimensions = true;
+            rowsSpinner.getValueFactory().setValue(3);
+            colsSpinner.getValueFactory().setValue(3);
+            settingFileDimensions = false;
+            rebuildGrid(null);
+        }
         for (TextField[] row : cells) {
             for (TextField tf : row) {
                 tf.setText("");
@@ -222,6 +251,14 @@ public class MatrixPage extends VBox {
 
     // pesan error input 
     private Matrix readGrid() {
+    if (loadedFromFile && largeFileMatrix != null) return largeFileMatrix;
+    if (cells.length == 0) throw new MatrixException("Tidak ada matriks yang dimuat atau dimasukkan");
+    if (!loadedFromFile && (cells.length > IOUtils.MAX_MANUAL_MATRIX_SIZE
+            || (augmented ? cells[0].length - 1 : cells[0].length) > IOUtils.MAX_MANUAL_MATRIX_SIZE)) {
+        throw new MatrixException("Input manual dibatasi maksimal " + IOUtils.MAX_MANUAL_MATRIX_SIZE
+                + " × " + IOUtils.MAX_MANUAL_MATRIX_SIZE
+                + " (kolom konstanta SPL tidak dihitung sebagai variabel)");
+    }
     Matrix m = new Matrix(cells.length, cells[0].length);
     StringBuilder errorBuilder = new StringBuilder();
 
@@ -263,17 +300,34 @@ public class MatrixPage extends VBox {
             Matrix m = IOUtils.readMatrixFromFile(f.getAbsolutePath());
             if (augmented) {
                 if (m.getCols() < 2) throw new MatrixException("File SPL minimal punya 2 kolom (koefisien dan konstanta)");
-                if (m.getRows() > maxSize || m.getCols() - 1 > maxSize)
-                    throw new MatrixException("Ukuran matriks pada file melebihi batas " + maxSize);
-                colsSpinner.getValueFactory().setValue(m.getCols() - 1);
+                if (m.getRows() > IOUtils.MAX_FILE_MATRIX_ROWS || m.getCols() - 1 > IOUtils.MAX_FILE_MATRIX_ROWS)
+                    throw new MatrixException("Ukuran matriks SPL pada berkas melebihi batas "
+                            + IOUtils.MAX_FILE_MATRIX_ROWS + " × " + (IOUtils.MAX_FILE_MATRIX_ROWS + 1));
             } else {
                 if (m.getRows() != m.getCols()) throw new MatrixException("Matriks pada file harus persegi");
-                if (m.getRows() > maxSize) throw new MatrixException("Ukuran matriks pada file melebihi batas " + maxSize);
+                if (m.getRows() > IOUtils.MAX_FILE_MATRIX_ROWS)
+                    throw new MatrixException("Ukuran matriks pada berkas melebihi batas " + IOUtils.MAX_FILE_MATRIX_ROWS);
             }
+            boolean largeMatrix = m.getRows() > maxSize
+                    || (augmented ? m.getCols() - 1 : m.getCols()) > maxSize;
+            if (largeMatrix) {
+                largeFileMatrix = m;
+                loadedFromFile = true;
+                Theme.showStatus(status, Theme.Tone.INFO,
+                        "Matriks " + m.getRows() + " × " + m.getCols()
+                                + " dimuat dari berkas dan akan diproses langsung");
+                return;
+            }
+            settingFileDimensions = true;
+            if (augmented) colsSpinner.getValueFactory().setValue(m.getCols() - 1);
             rowsSpinner.getValueFactory().setValue(m.getRows());
+            largeFileMatrix = null;
             rebuildGrid(m);
+            loadedFromFile = true;
+            settingFileDimensions = false;
             Theme.showStatus(status, Theme.Tone.INFO, "Dimuat dari " + f.getName());
         } catch (MatrixException ex) {
+            settingFileDimensions = false;
             Theme.showStatus(status, Theme.Tone.ERROR, ex.getMessage());
         }
     }

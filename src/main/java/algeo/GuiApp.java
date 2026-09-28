@@ -47,7 +47,7 @@ public class GuiApp extends Application {
 
     private static final int MAX_MATRIX_SIZE = 11;
     private static final int MAX_INTERPOLATION_POINTS = 10;
-    private static final int MAX_REGRESSION_POINTS = 1000;
+    private static final int MAX_REGRESSION_POINTS = IOUtils.MAX_CURVE_POINTS;
 
     private final BorderPane root = new BorderPane();
     private final Label pageTitle = Theme.label("", "page-title");
@@ -195,10 +195,10 @@ public class GuiApp extends Application {
         pages.put("poly", new Page("Kurva", "Interpolasi polinomial",
                 "Bentuk kurva polinomial tunggal yang melewati seluruh titik data secara presisi.",
                 this::polynomialPage));
-        pages.put("spline", new Page("Kurva", "Interpolasi Splina kubik natural",
+        pages.put("spline", new Page("Kurva", "Interpolasi spline kubik natural",
                 "Bentuk kurva mulus dari potongan polinomial kubik S(x) antar titik yang kontinu hingga turunan kedua, dengan S''(x) = 0 di kedua ujung.",
                 this::splinePage));
-        pages.put("reg", new Page("Kurva", "Regresi splina kubik",
+        pages.put("reg", new Page("Kurva", "Regresi spline kubik",
                 "Bentuk kurva pendekatan data non-linear melalui potongan polinomial bersimpul menggunakan Metode Kuadrat Terkecil.",
                 this::regressionPage));
     }
