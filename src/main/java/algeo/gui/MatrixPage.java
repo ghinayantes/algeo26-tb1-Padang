@@ -327,7 +327,7 @@ public class MatrixPage extends VBox {
             loadedFromFile = true;
             settingFileDimensions = false;
             Theme.showStatus(status, Theme.Tone.INFO,
-                    "Dimuat dari " + f.getName() + " (" + m.getRows() + " × " + m.getCols() + ").");
+                    "Matriks berukuran "+ m.getRows() + " × " + m.getCols() + " dimuat dari " + f.getName());
         } catch (MatrixException ex) {
             settingFileDimensions = false;
             Theme.showStatus(status, Theme.Tone.ERROR, ex.getMessage());
