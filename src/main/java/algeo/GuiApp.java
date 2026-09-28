@@ -208,7 +208,7 @@ public class GuiApp extends Application {
         return new MatrixPage(methods, true, MAX_MATRIX_SIZE, "Selesaikan", (m, method) -> {
             SPLSolver solver;
             switch (method) {
-                case "Eliminasi Gauss": solver = new Gauss(); break;
+                case "Gauss": solver = new Gauss(); break;
                 case "Gauss-Jordan": solver = new GaussJordan(); break;
                 case "Matriks balikan": solver = new InverseSPL(); break;
                 default: solver = new Cramer();
