@@ -475,7 +475,7 @@ public class PlotView extends Pane {
 
     private void drawLegend(GraphicsContext g, double left, double w) {
         double y = 16;
-        double x = left - 22;
+        double x = left - 20;
         g.setFont(Theme.sans(12.5));
         g.setTextBaseline(VPos.CENTER);
         g.setTextAlign(TextAlignment.LEFT);
