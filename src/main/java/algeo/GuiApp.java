@@ -104,7 +104,7 @@ public class GuiApp extends Application {
     }
 
     private Node buildSidebar() {
-        Label brand = Theme.label("Aljabar Linear \ndan Geometri", "brand-title");
+        Label brand = Theme.label("Aljabar Linier \ndan Geometri", "brand-title");
         Label sub = Theme.label("Sistem Persamaan Linier, \nDeterminan, dan Penerapan\n\nIF2123 \u00B7 Kelompok Padang", "brand-sub");
         VBox brandBox = new VBox(2, brand, sub);
         brandBox.setPadding(new Insets(26, 20, 22, 20));

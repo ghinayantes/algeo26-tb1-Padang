@@ -51,7 +51,7 @@ public class App {
 
     private static void printMainMenu() {
         System.out.println("\n======================================================");
-        System.out.println("      Kalkulator Aljabar Linear dan Geometri");
+        System.out.println("      Kalkulator Aljabar Linier dan Geometri");
         System.out.println("Sistem Persamaan Linier, Determinan, dan Penerapannya");
         System.out.println("                  Kelompok Padang");
         System.out.println("======================================================\n");
