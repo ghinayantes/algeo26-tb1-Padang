@@ -7,7 +7,7 @@ import algeo.matrix.MatrixException;
 public class CubicSplineRegression {
 
     // batas maksimal titik data 
-    private static final int MAX_POINTS = 1000;
+    private static final int MAX_POINTS = 10;
 
     // toleransi relatif untuk mendeteksi pivot bernilai nol
     private static final double RANK_TOLERANCE = 1e-11;

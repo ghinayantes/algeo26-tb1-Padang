@@ -240,7 +240,7 @@ public class App {
 
     private static void handleCubicSplineRegression(Scanner sc) {
         System.out.println("\nREGRESI SPLINE KUBIK");
-        double[][] points = obtainPoints(sc, 1000);
+        double[][] points = obtainPoints(sc, IOUtils.MAX_CURVE_POINTS);
 
         int k = IOUtils.readInt(sc, "\nMasukkan jumlah knot yang diinginkan: ");
         if (k < 0) {
