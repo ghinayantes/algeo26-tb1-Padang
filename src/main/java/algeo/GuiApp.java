@@ -214,8 +214,8 @@ public class GuiApp extends Application {
                 default: solver = new Cramer();
             }
             if (!solver.isApplicable(m)) {
-                throw new MatrixException("Metode " + solver.getName()
-                        + " membutuhkan jumlah persamaan yang sama dengan jumlah variabel \nSolusi: Gunakan eliminasi Gauss atau Gauss-Jordan");
+                throw new MatrixException(solver.getName()
+                        + " membutuhkan jumlah persamaan yang sama dengan jumlah variabel.\nSolusi: Gunakan eliminasi Gauss atau Gauss-Jordan.");
             }
             String result = solver.solve(m);
             String file = "Metode Penyelesaian SPL: " + solver.getName() + "\n\n"
