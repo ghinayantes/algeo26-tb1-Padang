@@ -23,6 +23,8 @@ import java.io.File;
 
 public class MatrixPage extends VBox {
 
+    private static final long MAX_VISIBLE_FILE_MATRIX_CELLS = 1_011;
+
     public static final class Result {
         final String display;
         final String fileContent;
@@ -308,14 +310,13 @@ public class MatrixPage extends VBox {
                 if (m.getRows() > IOUtils.MAX_FILE_MATRIX_ROWS)
                     throw new MatrixException("Ukuran matriks pada berkas melebihi batas " + IOUtils.MAX_FILE_MATRIX_ROWS);
             }
-            boolean largeMatrix = m.getRows() > maxSize
-                    || (augmented ? m.getCols() - 1 : m.getCols()) > maxSize;
-            if (largeMatrix) {
+            boolean tooLargeToDisplay = (long) m.getRows() * m.getCols() > MAX_VISIBLE_FILE_MATRIX_CELLS;
+            if (tooLargeToDisplay) {
                 largeFileMatrix = m;
                 loadedFromFile = true;
                 Theme.showStatus(status, Theme.Tone.INFO,
                         "Matriks " + m.getRows() + " × " + m.getCols()
-                                + " dimuat dari berkas dan akan diproses langsung");
+                                + " dimuat dari berkas dan akan diproses langsung karena ukurannya terlalu besar untuk ditampilkan di kisi.");
                 return;
             }
             settingFileDimensions = true;
@@ -325,7 +326,8 @@ public class MatrixPage extends VBox {
             rebuildGrid(m);
             loadedFromFile = true;
             settingFileDimensions = false;
-            Theme.showStatus(status, Theme.Tone.INFO, "Dimuat dari " + f.getName());
+            Theme.showStatus(status, Theme.Tone.INFO,
+                    "Dimuat dari " + f.getName() + " (" + m.getRows() + " × " + m.getCols() + ").");
         } catch (MatrixException ex) {
             settingFileDimensions = false;
             Theme.showStatus(status, Theme.Tone.ERROR, ex.getMessage());
