@@ -66,6 +66,80 @@ mvn clean package
 
 Perintah pertama menghapus hasil build sebelumnya lalu mengompilasi kode. Perintah kedua mengompilasi dan mengemas proyek; hasil build berada di direktori `target/`.
 
+## Menjalankan Program melalui JAR
+
+JAR runnable tersedia di dalam direktori `bin/`. Jalankan dari terminal tanpa Maven menggunakan Java 21 atau lebih baru. Periksa versi Java dengan:
+
+```bash
+java --version
+```
+
+Pastikan terminal berada di direktori utama proyek, yaitu direktori yang berisi `pom.xml` dan folder `bin/`.
+
+### GUI (antarmuka grafis)
+
+Jalankan GUI dengan perintah:
+
+```bash
+java -jar bin/matrix-calculator-gui-1.0-SNAPSHOT.jar
+```
+
+Pada Windows PowerShell, perintah dari direktori utama proyek:
+
+```powershell
+java -jar .\bin\matrix-calculator-gui-1.0-SNAPSHOT.jar
+```
+
+Jendela kalkulator akan terbuka. Pilih fitur dari navigasi di sisi kiri. Komputer harus memiliki desktop dengan dukungan grafis. JAR GUI berisi pustaka native JavaFX untuk platform tempat JAR dibuat; untuk OS atau arsitektur lain, bangun JAR pada platform tujuan.
+
+### CLI (antarmuka terminal)
+
+Jalankan CLI dengan perintah:
+
+```bash
+java -jar bin/matrix-calculator-1.0-SNAPSHOT.jar
+```
+
+Pada Windows PowerShell:
+
+```powershell
+java -jar .\bin\matrix-calculator-1.0-SNAPSHOT.jar
+```
+
+Ikuti menu bernomor pada terminal. Pilih `7` untuk keluar.
+
+### Membuat atau memperbarui JAR
+
+Jika JAR belum tersedia atau ingin membuatnya kembali dari kode sumber, pasang Maven lalu jalankan dari direktori utama proyek:
+
+```bash
+mvn clean package
+```
+
+Perintah tersebut membuat kedua JAR di `bin/`: `matrix-calculator-1.0-SNAPSHOT.jar` untuk CLI dan `matrix-calculator-gui-1.0-SNAPSHOT.jar` untuk GUI.
+
+### Menjalankan bytecode langsung
+
+Jika ingin menjalankan file `.class` hasil kompilasi, bukan JAR, buat atau perbarui bytecode terlebih dahulu:
+
+```bash
+mvn clean compile
+```
+
+Maven menyalin hasil kompilasi ke struktur paket `bin/algeo/`. Dari direktori utama proyek, jalankan CLI dengan:
+
+```bash
+java -cp bin algeo.App
+```
+
+Perintah ini menjalankan bytecode CLI. Untuk GUI, gunakan JAR GUI di bagian sebelumnya karena JavaFX memerlukan pustaka runtime dan native yang sesuai platform.
+
+### Pemecahan masalah
+
+- Jika muncul pesan `no main manifest attribute`, gunakan JAR yang tercantum di atas dan buat ulang dengan `mvn clean package`.
+- Jika muncul `JavaFX runtime components are missing`, pastikan Anda menjalankan JAR GUI terbaru, bukan JAR CLI. Jika JAR dipindahkan ke OS/arsitektur lain, buat ulang paket pada platform tujuan.
+- Jika menggunakan perintah classpath `java -cp bin algeo.App`, pastikan sudah menjalankan `mvn clean compile` agar bytecode tersedia pada `bin/algeo/`.
+
 ## Alur penggunaan
 
 1. Jalankan program dengan antarmuka grafis atau CLI.
